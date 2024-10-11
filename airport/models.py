@@ -24,7 +24,7 @@ class Airplane(models.Model):
     name = models.CharField(max_length=63)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
-    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name='airplanes')
+    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name="airplanes")
 
     @property
     def capacity(self) -> int:
@@ -42,8 +42,8 @@ class Airport(models.Model):
 
 
 class Route(models.Model):
-    source = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='departure_routes')
-    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='arrival_routes')
+    source = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departure_routes")
+    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arrival_routes")
     distance = models.IntegerField()
 
     def __str__(self):
@@ -51,8 +51,8 @@ class Route(models.Model):
 
 
 class Flight(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='flights')
-    airplane = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name='flights')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="flights")
+    airplane = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name="flights")
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
 
@@ -62,7 +62,7 @@ class Flight(models.Model):
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
 
     def __str__(self):
         return str(self.created_at)
@@ -70,8 +70,8 @@ class Order(models.Model):
 class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='tickets')
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='tickets')
+    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name="tickets")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
     def __str__(self):
         return f"{str(self.flight)}-{self.seat}-{self.row}"
