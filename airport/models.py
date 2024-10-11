@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import ManyToManyField
 
 
 class Crew(models.Model):
@@ -59,6 +60,7 @@ class Flight(models.Model):
     airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE, related_name="flights")
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
+    crew = ManyToManyField(Crew)
 
     def __str__(self):
         return f"{str(self.route)}-{self.airplane.name}"
