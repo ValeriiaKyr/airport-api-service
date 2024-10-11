@@ -72,13 +72,13 @@ class Order(models.Model):
         return str(self.created_at)
 
 class Ticket(models.Model):
-    row = models.IntegerField()
+    rows = models.IntegerField()
     seat = models.IntegerField()
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name="tickets")
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
     class Meta:
-        unique_together = ("flight", "row", "seat")
+        unique_together = ("flight", "rows", "seat")
 
     def __str__(self):
         return f"{str(self.flight)}-{self.seat}-{self.row}"

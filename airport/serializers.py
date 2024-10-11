@@ -70,7 +70,6 @@ class FlightListSerializer(FlightSerializer):
         model = Flight
         fields = (
             "id",
-            # "route",
             "arrival_time",
             "departure_time",
             "airplane_name",
