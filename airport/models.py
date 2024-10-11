@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 
 class Crew(models.Model):
@@ -49,10 +50,13 @@ class Route(models.Model):
     def __str__(self):
         return self.source.name + "-" + self.destination.name
 
+    @property
+    def full_route(self):
+        return f"{self.source.closest_big_city}-{self.destination.closest_big_city}"
 
 class Flight(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="flights")
-    airplane = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name="flights")
+    airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE, related_name="flights")
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
 
@@ -73,8 +77,55 @@ class Ticket(models.Model):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name="tickets")
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
+    class Meta:
+        unique_together = ("flight", "row", "seat")
+
     def __str__(self):
         return f"{str(self.flight)}-{self.seat}-{self.row}"
 
-    class Meta:
-        unique_together = ("flight", "row", "seat")
+    def clean(self):
+        for ticket_attr_value, ticket_attr_name, airplane_attr_name in [
+            (self.row, "row", "rows"),
+            (self.seat, "seat", "seats_in_row"),
+        ]:
+            count_attrs = getattr(
+                self.flight.airplane, airplane_attr_name
+            )
+            if not (1 <= ticket_attr_value <= count_attrs):
+                raise ValidationError(
+                    {
+                        ticket_attr_name: f"{ticket_attr_name} "
+                                          f"number must be in available range: "
+                                          f"(1, {airplane_attr_name}): "
+                                          f"(1, {count_attrs})"
+                    }
+                )
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        super(Ticket, self).save(
+            force_insert, force_update, using, update_fields
+        )
+
+    @staticmethod
+    def validate_seat_and_row(
+            seat: int,
+            num_seats: int,
+            row: int,
+            num_rows: int,
+            error_to_raise
+    ):
+        if not (1 <= seat <= num_seats):
+            raise error_to_raise({
+                "seat": f"seat must be in range [1, {num_seats}], not {seat}"
+            })
+        if not (1 <= row <= num_rows):
+            raise error_to_raise({
+                "seat": f"row must be in range [1, {num_rows}], not {row}"
+            })
+
