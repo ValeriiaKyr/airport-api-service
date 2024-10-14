@@ -2,11 +2,20 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import ManyToManyField
+from django.utils.text import slugify
+import pathlib
+import uuid
+
+
+def crew_image_path(instance: "Crew", filename: str) -> pathlib.Path:
+    filename = f"{slugify(instance.full_name)}--{uuid.uuid4()}" + pathlib.Path(filename).suffix
+    return pathlib.Path("upload/crew/") / pathlib.Path(filename)
 
 
 class Crew(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to=crew_image_path, null=True, blank=True)
 
     def __str__(self):
         return self.first_name + " " + self.last_name

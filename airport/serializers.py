@@ -18,6 +18,23 @@ class CrewSerializer(serializers.ModelSerializer):
         fields = ("id", "first_name", "last_name", "full_name")
 
 
+class CrewListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crew
+        fields = ("id", "first_name", "last_name", "full_name", "image")
+
+
+class CrewDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crew
+        fields = ("id", "first_name", "last_name", "full_name", "image")
+
+class CrewImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crew
+        fields = ("id", "image")
+
+
 class AirplaneTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirplaneType
@@ -100,9 +117,6 @@ class FlightListSerializer(FlightSerializer):
             "crew",
             "tickets_available"
         )
-
-
-
 
 
 class TicketSerializer(serializers.ModelSerializer):

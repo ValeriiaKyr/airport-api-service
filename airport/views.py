@@ -1,7 +1,9 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django.db.models import F, Count
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from airport.models import (
     Crew,
@@ -22,7 +24,8 @@ from airport.serializers import (
     FlightSerializer,
     OrderSerializer,
     TicketSerializer, FlightListSerializer, FlightDetailSerializer, AirplaneListSerializer, AirplaneDetailSerializer,
-    RouteListSerializer, RouteDetailSerializer, OrderListSerializer,
+    RouteListSerializer, RouteDetailSerializer, OrderListSerializer, CrewImageSerializer, CrewListSerializer,
+    CrewDetailSerializer,
 )
 
 
@@ -47,6 +50,35 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return CrewListSerializer
+
+        if self.action == "retrieve":
+            return CrewDetailSerializer
+
+        if self.action == "upload_image":
+            return CrewImageSerializer
+
+        return CrewSerializer
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="upload-image",
+        # permission_classes=[IsAdminUser],
+    )
+    def upload_image(self, request, pk=None):
+        crew = self.get_object()
+        serializer = self.get_serializer(crew, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
