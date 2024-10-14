@@ -73,6 +73,9 @@ class Order(models.Model):
     def __str__(self):
         return str(self.created_at)
 
+    class Meta:
+        ordering = ["-created_at"]
+
 class Ticket(models.Model):
     rows = models.IntegerField()
     seat = models.IntegerField()
