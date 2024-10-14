@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from django.db.models import F, Count
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from airport.models import (
     Crew,
@@ -55,6 +56,25 @@ class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
 
+    @staticmethod
+    def _params_to_ints(qs):
+        return [int(str_id) for str_id in qs.split(",")]
+
+    def get_queryset(self):
+        source = self.request.query_params.get("source")
+        destination = self.request.query_params.get("destination")
+
+        queryset = self.queryset.select_related("source", "destination")
+        if source:
+            source_ids = self._params_to_ints(source)
+            queryset = queryset.filter(source__id__in=source_ids)
+
+        if destination:
+            destination_ids = self._params_to_ints(destination)
+            queryset = queryset.filter(destination__id__in=destination_ids)
+
+        return queryset.distinct()
+
     def get_serializer_class(self):
         if self.action == "list":
             return RouteListSerializer
@@ -62,6 +82,23 @@ class RouteViewSet(viewsets.ModelViewSet):
             return RouteDetailSerializer
 
         return RouteSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "source",
+                type={"type": "array", "items": {"type": "number"}},
+                description="Filter by source id {ex. ?source=2,3}"
+            ),
+            OpenApiParameter(
+                "destination",
+                type={"type": "array", "items": {"type": "number"}},
+                description="Filter by destination id {ex. ?destination=1,2}"
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class FlightViewSet(viewsets.ModelViewSet):
     # queryset = Flight.objects.all()
