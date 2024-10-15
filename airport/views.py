@@ -4,6 +4,8 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 
 from airport.models import (
     Crew,
@@ -23,8 +25,16 @@ from airport.serializers import (
     RouteSerializer,
     FlightSerializer,
     OrderSerializer,
-    TicketSerializer, FlightListSerializer, FlightDetailSerializer, AirplaneListSerializer, AirplaneDetailSerializer,
-    RouteListSerializer, RouteDetailSerializer, OrderListSerializer, CrewImageSerializer, CrewListSerializer,
+    TicketSerializer,
+    FlightListSerializer,
+    FlightDetailSerializer,
+    AirplaneListSerializer,
+    AirplaneDetailSerializer,
+    RouteListSerializer,
+    RouteDetailSerializer,
+    OrderListSerializer,
+    CrewImageSerializer,
+    CrewListSerializer,
     CrewDetailSerializer,
 )
 
@@ -67,7 +77,7 @@ class CrewViewSet(viewsets.ModelViewSet):
         methods=["POST"],
         detail=True,
         url_path="upload-image",
-        # permission_classes=[IsAdminUser],
+        permission_classes=[IsAdminUser],
     )
     def upload_image(self, request, pk=None):
         crew = self.get_object()
@@ -163,6 +173,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
+    permission_classes = (IsAuthenticated,)
+
 
 
     def get_serializer_class(self):
