@@ -95,7 +95,7 @@ class Ticket(models.Model):
         unique_together = ("flight", "rows", "seat")
 
     def __str__(self):
-        return f"{str(self.flight)}-{self.seat}-{self.row}"
+        return f"{str(self.flight)}-{self.seat}-{self.rows}"
 
     def clean(self):
         for ticket_attr_value, ticket_attr_name, airplane_attr_name in [

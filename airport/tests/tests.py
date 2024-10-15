@@ -10,7 +10,8 @@ from rest_framework.test import APIClient
 
 from airport.models import Crew, AirplaneType, Airplane, Airport, Route, Flight, Ticket, Order
 from airport.serializers import FlightListSerializer, CrewListSerializer, CrewDetailSerializer, AirplaneTypeSerializer, \
-    AirplaneSerializer, AirplaneDetailSerializer, AirportSerializer, RouteSerializer, RouteDetailSerializer
+    AirplaneSerializer, AirplaneDetailSerializer, AirportSerializer, RouteSerializer, RouteDetailSerializer, \
+    FlightSerializer, FlightDetailSerializer
 
 
 def sample_crew(**params):
@@ -22,13 +23,6 @@ def sample_crew(**params):
 
     return Crew.objects.create(**defaults)
 
-# def sample_airplane_type(**params):
-#     defaults = {
-#         "name": "Test",
-#     }
-#     defaults.update(params)
-#
-#     return AirplaneType.objects.create(**defaults)
 
 def sample_airplane(**params):
     airplane_type = AirplaneType.objects.create(
@@ -72,14 +66,6 @@ def sample_route(**params):
     return Route.objects.create(**defaults)
 
 def sample_flight(**params):
-    # crew1 = Crew.objects.create(
-    #     first_name="First1",
-    #     last_name="Last1",
-    # )
-    # crew2 = Crew.objects.create(
-    #     first_name="First2",
-    #     last_name="Last2",
-    # )
     source = Airport.objects.create(
         name="Test1",
         closest_big_city="TestCity1",
@@ -122,6 +108,9 @@ ROUTE_URL = reverse("airport:route-list")
 
 def detail_crew_url(crew_id):
     return reverse("airport:crew-detail", args=[crew_id])
+
+def detail_flight_url(flight_id):
+    return reverse("airport:flight-detail", args=[flight_id])
 
 def detail_route_url(route_id):
     return reverse("airport:route-detail", args=[route_id])
@@ -339,7 +328,3 @@ class RouteTest(TestCase):
                 self.assertEqual(payload[key], route.destination.id)
             else:
                 self.assertEqual(payload[key], getattr(route, key))
-
-
-# class FlightTest(TestCase):
-#     def setUp(self):
