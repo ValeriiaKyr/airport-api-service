@@ -69,7 +69,7 @@ class Flight(models.Model):
     airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE, related_name="flights")
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
-    crew = ManyToManyField(Crew)
+    crew = ManyToManyField(Crew, blank=True)
 
     def __str__(self):
         return f"{str(self.route)}-{self.airplane.name}"
@@ -99,7 +99,7 @@ class Ticket(models.Model):
 
     def clean(self):
         for ticket_attr_value, ticket_attr_name, airplane_attr_name in [
-            (self.row, "row", "rows"),
+            (self.rows, "row", "rows"),
             (self.seat, "seat", "seats_in_row"),
         ]:
             count_attrs = getattr(
