@@ -8,10 +8,23 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from airport.models import Crew, AirplaneType, Airplane, Airport, Route, Flight, Ticket, Order
-from airport.serializers import FlightListSerializer, CrewListSerializer, CrewDetailSerializer, AirplaneTypeSerializer, \
-    AirplaneSerializer, AirplaneDetailSerializer, AirportSerializer, RouteSerializer, RouteDetailSerializer, \
-    FlightSerializer, FlightDetailSerializer
+from airport.models import (
+    Crew,
+    AirplaneType,
+    Airplane,
+    Airport,
+    Route,
+    Flight
+)
+from airport.serializers import (
+    CrewListSerializer,
+    CrewDetailSerializer,
+    AirplaneSerializer,
+    AirplaneDetailSerializer,
+    AirportSerializer,
+    RouteSerializer,
+    RouteDetailSerializer
+)
 
 
 def sample_crew(**params):
@@ -38,6 +51,7 @@ def sample_airplane(**params):
 
     return Airplane.objects.create(**defaults)
 
+
 def sample_airport(**params):
     defaults = {
         "name": "Test",
@@ -47,14 +61,15 @@ def sample_airport(**params):
 
     return Airport.objects.create(**defaults)
 
+
 def sample_route(**params):
     source = Airport.objects.create(
-        name = "Test1",
-        closest_big_city = "TestCity1",
+        name="Test1",
+        closest_big_city="TestCity1",
     )
     destination = Airport.objects.create(
-        name = "Test2",
-        closest_big_city = "TestCity2",
+        name="Test2",
+        closest_big_city="TestCity2",
     )
     defaults = {
         "source": source,
@@ -64,6 +79,7 @@ def sample_route(**params):
     defaults.update(params)
 
     return Route.objects.create(**defaults)
+
 
 def sample_flight(**params):
     source = Airport.objects.create(
@@ -83,10 +99,10 @@ def sample_flight(**params):
         name="Test",
     )
     airplane = Airplane.objects.create(
-        name = "Test",
-        rows = 20,
-        seats_in_row = 20,
-        airplane_type = airplane_type
+        name="Test",
+        rows=20,
+        seats_in_row=20,
+        airplane_type=airplane_type
     )
     defaults = {
         "route": route,
@@ -98,28 +114,34 @@ def sample_flight(**params):
 
     return Flight.objects.create(**defaults)
 
+
 User = get_user_model()
 CREW_URL = reverse("airport:crew-list")
 AIRPLANE_URL = reverse("airport:airplane-list")
 AIRPORT_URL = reverse("airport:airport-list")
-# AIRPLANE_TYPE_URL = reverse("airport:airplane_type-list")
 FLIGHT_URL = reverse("airport:flight-list")
 ROUTE_URL = reverse("airport:route-list")
+
 
 def detail_crew_url(crew_id):
     return reverse("airport:crew-detail", args=[crew_id])
 
+
 def detail_flight_url(flight_id):
     return reverse("airport:flight-detail", args=[flight_id])
+
 
 def detail_route_url(route_id):
     return reverse("airport:route-detail", args=[route_id])
 
+
 def detail_airplane_url(airplane_id):
     return reverse("airport:airplane-detail", args=[airplane_id])
 
+
 def image_upload_url(crew_id):
     return reverse("airport:crew-upload-image", args=[crew_id])
+
 
 class CrewTest(TestCase):
     def setUp(self):
@@ -146,6 +168,7 @@ class CrewTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
 
 class CrewImageUploadTest(TestCase):
     def setUp(self):
@@ -189,7 +212,9 @@ class CrewImageUploadTest(TestCase):
                     "first_name": "Test1",
                     "last_name": "Test2",
                     "image": ntf
-            }, format="multipart")
+                },
+                format="multipart"
+            )
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         crew = Crew.objects.get(first_name="Test1")
@@ -205,6 +230,7 @@ class CrewImageUploadTest(TestCase):
         res = self.client.get(detail_crew_url(self.crew.id))
 
         self.assertIn("image", res.data)
+
 
 class AirplaneTest(TestCase):
     def setUp(self):
@@ -291,8 +317,14 @@ class RouteTest(TestCase):
         self.user = get_user_model().objects.create_user(
             email="test@test.test", password="testpass"
         )
-        self.source = Airport.objects.create(name="Test1", closest_big_city="TestCity1")
-        self.destination = Airport.objects.create(name="Test2", closest_big_city="TestCity2")
+        self.source = Airport.objects.create(
+            name="Test1",
+            closest_big_city="TestCity1"
+        )
+        self.destination = Airport.objects.create(
+            name="Test2",
+            closest_big_city="TestCity2"
+        )
         self.client.force_authenticate(self.user)
 
     def test_route_list(self):

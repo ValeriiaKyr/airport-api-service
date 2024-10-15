@@ -1,11 +1,10 @@
-from rest_framework import viewsets, status
 from django.db.models import F, Count
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+from rest_framework.response import Response
 
 from airport.models import (
     Crew,
@@ -15,7 +14,6 @@ from airport.models import (
     Route,
     Flight,
     Order,
-    Ticket,
 )
 from airport.serializers import (
     AirportSerializer,
@@ -25,7 +23,6 @@ from airport.serializers import (
     RouteSerializer,
     FlightSerializer,
     OrderSerializer,
-    TicketSerializer,
     FlightListSerializer,
     FlightDetailSerializer,
     AirplaneListSerializer,
@@ -56,6 +53,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             return AirplaneDetailSerializer
 
         return AirplaneSerializer
+
 
 class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
@@ -143,14 +141,16 @@ class RouteViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+
 class FlightViewSet(viewsets.ModelViewSet):
-    # queryset = Flight.objects.all()
     queryset = (
         Flight.objects.all()
         .select_related("route", "airplane")
         .annotate(
             tickets_available=(
-                F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+                F("airplane__rows")
+                * F("airplane__seats_in_row")
+                - Count("tickets")
             )
         )
     )
@@ -165,17 +165,17 @@ class FlightViewSet(viewsets.ModelViewSet):
 
         return FlightSerializer
 
+
 class OrderPagination(PageNumberPagination):
     page_size = 10
     max_page_size = 100
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     permission_classes = (IsAuthenticated,)
-
-
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -185,7 +185,3 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-
-
-
